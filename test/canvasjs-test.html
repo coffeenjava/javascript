@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<script src="../lib/jquery-1.7.js"></script>
+</head>
+
+<body>
+	<div>
+		<button id='popup' data-key='1123' type='button'>popup</button>
+	</div>
+</body>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#popup').click(function() {
+		var key = $(this).data('key');
+		window.open('chart.html#'+key, '_blank', 'width=300,height=200,top=300,left=400');
+	});	
+});
+</script>
+</html>

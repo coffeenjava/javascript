@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<script src="canvasjs.min.js"></script>
+	<script src="../lib/jquery-1.7.js"></script>
+	<title>가격 변동 현황</title>
+</head>
+
+<body>
+	<div id="chartContainer" style="height: 400px; width: 100%;"></div>
+</body>
+<script type="text/javascript">
+$(document).ready(function() {
+	console.log(window.location.href);
+	console.log(window.location.hash);
+	var key = window.location.hash.split('#')[1];
+	// $.post('https://billadmin-coffeenjava.d2.tmon.co.kr/logUtil/test', { key: key });
+
+	var chart = new CanvasJS.Chart("chartContainer", {
+		theme: 'theme2',
+		animationEnabled: true,
+		title: {
+			text: '가격 변동 현황',
+			fontFamily: 'verdana',
+			fontWeight: 'lighter',
+			margin: 30
+		},
+		axisX: {
+			// interval: 1,
+			// intervalType: 'month',
+			// minimum: '2016-08-14 11:20:50',
+			valueFormatString: 'MM-DD',
+			labelAngle: -20
+		},
+		axisY: {
+			// minimum: 64000-10000,
+			// interval: 5000,
+			interlacedColor: '#fafafa',
+			gridColor: '#d7d7d7',
+			tickColor: 'green',
+			includeZero: false,
+			labelAngle: -20
+		},
+		data: [{
+			type: 'spline',//"spline",
+			showInLegend: true,
+			legendText: '정상가',
+			xValueFormatString: 'YYYY-MM-DD HH:mm:ss',
+			dataPoints: [
+				{ x: new Date('2016-08-14 10:00:00') },
+			  	{ x: new Date('2016-08-14 11:20:50'), y: 65000 },
+			  	{ x: new Date('2016-08-16 11:48:53'), y: 62000 },
+			  	{ x: new Date('2016-08-16 11:55:22'), y: 65000 },
+			  	{ x: new Date('2016-08-16 12:00:18'), y: 66000, markerColor: 'green', markerSize: 10 },
+			  	{ x: new Date('2016-08-16 13:00:00') }
+			]
+		},{
+			type: 'spline',//"spline",
+			showInLegend: true,
+			legendText: '할인가',
+			xValueFormatString: 'YYYY-MM-DD HH:mm:ss',
+			dataPoints: [
+			  { x: new Date('2016-08-14 11:20:50'), y: 64000 },
+			  { x: new Date('2016-08-16 11:48:53'), y: 60000 },
+			  { x: new Date('2016-08-16 11:55:22'), y: 63000 },
+			  { x: new Date('2016-08-16 12:00:18'), y: 62000, markerColor: 'green' }
+			]
+		}]
+	});
+
+	var data = '[{"deal_srl":"71407953","main_deal_srl":"70743605","created_at":"2014-05-08 14:09:45","who_update":"ggang@tmon.co.kr","deal_amount":"2900","deal_disamount":"2900"},{"old_deal_srl":"71407953","deal_srl":"358400219","main_deal_srl":"70743605","created_at":"2016-06-29 10:47:36","who_update":"ggang@tmon.co.kr","deal_amount":"2900","deal_disamount":"2900"},{"old_deal_srl":"358400219","deal_srl":"358408143","main_deal_srl":"70743605","created_at":"2016-06-29 10:53:57","who_update":"ggang@tmon.co.kr","deal_amount":"2900","deal_disamount":"290"}]';
+
+	data = JSON.parse(data);
+
+	console.log(data);
+
+	var amounts =[], disamounts= [];
+
+	data.forEach(function(item, idx, all) {
+                    amounts.push({
+                        x: new Date(item.created_at),
+                        y: Number(item.deal_amount)
+                    });
+                    disamounts.push({
+                        x: new Date(item.created_at),
+                        y: Number(item.deal_disamount)
+                    });
+                });
+
+	var chart = new CanvasJS.Chart("chartContainer", {
+		theme: 'theme2',
+		animationEnabled: true,
+		title: {
+			text: '가격 변동 현황',
+			fontFamily: 'verdana',
+			fontWeight: 'lighter',
+			margin: 30
+		},
+		axisX: {
+			// interval: 1,
+			// intervalType: 'month',
+			// minimum: '2016-08-14 11:20:50',
+			valueFormatString: 'MM-DD',
+			labelAngle: -20
+		},
+		axisY: {
+			// minimum: 64000-10000,
+			// interval: 5000,
+			interlacedColor: '#fafafa',
+			gridColor: '#d7d7d7',
+			tickColor: 'green',
+			includeZero: false,
+			labelAngle: -20
+		},
+		data: [{
+			type: "spline",
+			showInLegend: true,
+			legendText: '정상가',
+			xValueFormatString: 'YYYY-MM-DD HH:mm:ss',
+			dataPoints: amounts
+		},{
+			type: "spline",
+			showInLegend: true,
+			legendText: '할인가',
+			xValueFormatString: 'YYYY-MM-DD HH:mm:ss',
+			dataPoints: disamounts
+		}]
+	});
+
+	chart.render();
+});
+</script>
+</html>

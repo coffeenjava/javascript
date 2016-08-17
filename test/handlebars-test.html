@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>HandleBars</title>
+	<!-- <script type="text/javascript" src="lib/jquery-2.1.4.min.js"></script> -->
+	<script type="text/javascript" src="lib/jquery-1.7.js"></script>
+	<script type="text/javascript" src="lib/handlebars-v4.0.5.js"></script>
+</head>
+<body>
+
+</body>
+
+<table>
+</table>
+
+<script id="test-tpl" type="text/x-handlebars-template">
+{{!-- 주석 --}}
+{{#each options}}
+	<tr>
+		<td>
+			<input type="text" name="nm{{id}}" value="{{name}}">
+		</td>
+		<td>{{id}}</td>
+		<td>{{gval 'tmp.[name]'}}</td>
+		<td>{{inc @index}}</td>
+		{{#if (or @first true)}}
+		<td>first</td>
+		{{else}}
+		<td>last</td>
+		{{/if}}
+
+		{{#if (or (eq isWorking 'Y') (eq id 'a'))}}
+		<td>Y and a</td>
+		{{else}}
+		<td>not eq</td>
+		{{/if}}
+
+		{{#xif "this.isWorking == 'Y' && this.id == 'a'"}}
+		<td>Y and a</td>
+		{{else}}
+		<td>not eq</td>
+		{{/xif}}
+
+		{{#if (gval 'data.options.0.name')}}
+		<td>OK</td>
+		{{/if}}
+		<td style='{{if3 (eq isWorking 'Y') '' 'display:none'}}''>working</td>
+		{{#each arr}}
+		<td>{{gval 'gobj.name.[this]'}} - {{this}} = {{../name}}</td>
+		{{/each}}
+		<td>{{in_array (gval 'tmp.brian') 'hell,b,c'}}</td>
+		<td>[[{{../options.[0].id}}]]</td>
+		<td>{{or false emo}}</td>
+		<td>empty : {{is_empty (gval 'emptyObj')}}</td>
+		<td>{{if3 true (substr name 0 2) ''}}</td>
+		{{log 'look at me' name}}
+	</tr>
+{{/each}}
+	<tr>
+		<td>
+		{{#list nav id="nav-bar" class="top"}}
+		<a href="{{id}}">{{name}}</a>
+		{{/list}}
+		</td>
+	</tr>
+</script>
+
+<script type="text/javascript">
+Handlebars.registerHelper('list', function(ctx, options) {
+	// var attrs = SC.keys(options.hash).map(function(key) {
+	// 	key + '="' + options.hash[key] +'"';
+	// }).join(' ');
+	// return attrs;
+	debugger;
+});
+
+Handlebars.registerHelper('in_array', function(v, arr) {
+	return arr.split(',').indexOf(v) != -1;
+});
+
+Handlebars.registerHelper('if3', function(con, a, b) {
+	return con?a:b;
+});
+
+Handlebars.registerHelper('gval', function(v) {
+	var rs, k;
+
+	arr = v.split('.');
+	k = arr.shift();
+
+	rs = getMatchVal(window, k, this);
+
+	while (arr.length) {
+		rs = getMatchVal(rs, arr.shift(), this);
+	}
+
+	function getMatchVal(o, k, scope) {
+		var pt = /\W/g;
+
+		if (pt.test(k)) {
+			k = k.replace(pt,'');
+
+			if (k === 'this') {
+				return o[scope.toString()];
+			}
+
+			return scope[k];
+		}
+		return o[k];
+	}
+
+	console.log(rs);
+	return rs;
+});
+
+Handlebars.registerHelper('inc', function(v) {
+	return parseInt(v)+1;
+});
+
+Handlebars.registerHelper({
+	substr: function(v, s, e) {
+		return v.substr(s,e);
+	},
+	eq: function(a,b) {
+		// debugger;
+		return a===b;
+	},
+	ne: function(a,b) {
+		return a!==b;
+	},
+	and: function(a,b) {
+		return a&&b;
+	},
+	or: function(a,b) {
+		return !!a||!!b;
+	},
+	to_bool: function(v) {
+		return !!v
+	},
+	is_empty: function(v) {
+		return (typeof v === 'object') ? $.isEmptyObject(v) : !v;
+	}
+});
+
+
+Handlebars.registerHelper("xif", function (expression, options) {
+	return Handlebars.helpers["x"].apply(this, [expression, options]) ? options.fn(this) : options.inverse(this);
+});
+
+Handlebars.registerHelper("x", function (expression, options) {
+  var fn = function(){}, result;
+
+  // in a try block in case the expression have invalid javascript
+  try {
+    // create a new function using Function.apply, notice the capital F in Function
+    fn = Function.apply(
+      this,
+      [
+        'window', // or add more '_this, window, a, b' you can add more params if you have references for them when you call fn(window, a, b, c);
+        'return ' + expression + ';' // edit that if you know what you're doing
+      ]
+    );
+  } catch (e) {
+    console.warn('[warning] {{x ' + expression + '}} is invalid javascript', e);
+  }
+
+  // then let's execute this new function, and pass it window, like we promised
+  // so you can actually use window in your expression
+  // i.e expression ==> 'window.config.userLimit + 10 - 5 + 2 - user.count' //
+  // or whatever
+  try {
+    // if you have created the function with more params
+    // that would like fn(window, a, b, c)
+    result = fn.call(this, window);
+  } catch (e) {
+    console.warn('[warning] {{x ' + expression + '}} runtime error', e);
+  }
+  // return the output of that result, or undefined if some error occured
+  return result;
+});
+
+var tmp = {
+	brian: 'hello'
+};
+
+var gobj = {
+	name: {
+		'ar1-1': 'good'
+	}
+};
+
+var emptyObj = 0;
+
+var src = $('#test-tpl').html();
+var tpl = Handlebars.compile(src);
+var data = {
+	options: [{
+		id: 'a',
+		name: 'brian',
+		isWorking: 'Y',
+		arr: ['ar1-1','ar1-2'],
+		emo: 'aaa'
+	},{
+		id: 'b',
+		name: 'jisu',
+		isWorking: 'N',
+		arr: ['ar2-1','ar2-2']
+	}]
+};
+
+var rendered = tpl(data);
+$('table').append(rendered);
+</script>
+</html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+
+<head>
+    <META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>가격 변동 내역</title>
+    <script src="../lib/Chart.bundle.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="width:75%;">
+        <canvas id="canvas"></canvas>
+    </div>
+    <script>
+
+    function toMoney(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+        var labels = ['2016-08-14 11:20:50','2016-08-16 11:48:53','2016-08-16 11:55:22','2016-08-16 12:00:18'],
+            amounts = [65000,62000,65000,66000],
+            disamounts = [64000,60000,63000,62000];
+
+        var config = {
+            type: 'line',
+            options: {
+                title: {
+                    text: '가격 변동 내역',
+                    fontSize: 24,
+                    display: true
+                },
+                responsive: true,
+                legend: {
+                    position: 'bottom'
+                },
+                hover: {
+                    mode: 'dataset'
+                },
+                tooltips: {
+                    callbacks: {
+                        beforeLabel: function(item, data) {
+                            item.yLabel = toMoney(item.yLabel);
+                        }
+                    }
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            callback: function(label, i, labels) {
+                                return toMoney(label);
+                            }
+                        }
+                    }]
+                }
+            },
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "정상가",
+                    data: amounts,
+                    borderWidth: 1,
+                    // pointBackgroundColor: '#883a3a',
+                    // pointBorderColor: '#883a3a',
+                    borderColor: '#da5a53',
+                    backgroundColor: '#883a3a',
+                    // pointBorderWidth: 5,
+                    lineTension: 0,
+                    fill: false
+                },{
+                    label: "할인가",
+                    data: disamounts,
+                    borderWidth: 1,
+                    borderColor: '#4390df',
+                    backgroundColor: '#0050ef',
+                    // pointBorderWidth: 5,
+                    fill: false
+                }]
+            }
+        };
+
+        var data = '[{"deal_srl":"71407953","main_deal_srl":"70743605","created_at":"2014-05-08 14:09:45","who_update":"ggang@tmon.co.kr","deal_amount":"2900","deal_disamount":"2900"},{"old_deal_srl":"71407953","deal_srl":"358400219","main_deal_srl":"70743605","created_at":"2016-06-29 10:47:36","who_update":"ggang@tmon.co.kr","deal_amount":"2900","deal_disamount":"2900"},{"old_deal_srl":"358400219","deal_srl":"358408143","main_deal_srl":"70743605","created_at":"2016-06-29 10:53:57","who_update":"ggang@tmon.co.kr","deal_amount":"2900","deal_disamount":"290"}]';
+
+        data = JSON.parse(data);
+
+        console.log(data);
+
+        // labels.length = 0;
+        // amounts.length = 0;
+        // disamounts.length = 0;
+
+        labels.unshift('');
+        amounts.unshift(0);
+        disamounts.unshift(0);
+
+        data.forEach(function(item, idx, all) {
+            labels.push(item.created_at);
+            amounts.push(Number(item.deal_amount));
+            disamounts.push(Number(item.deal_disamount));
+        });
+
+        labels.push('');
+        amounts.push(0);
+        disamounts.push(0);
+
+        // $.each(config.data.datasets, function(i, dataset) {
+        //     var background = randomColor(0.5);
+        //     dataset.borderColor = background;
+        //     dataset.backgroundColor = background;
+        //     dataset.pointBorderColor = background;
+        //     dataset.pointBackgroundColor = background;
+        //     dataset.pointBorderWidth = 1;
+        // });
+
+        window.onload = function() {
+            var ctx = document.getElementById("canvas").getContext("2d");
+            window.myLine = new Chart(ctx, config);
+        };
+    </script>
+</body>
+
+</html>
